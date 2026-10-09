@@ -1,24 +1,21 @@
-# APIA — Widget Grist Discussions (v2)
+# APIA — Discussions v5 : mentions filtrées et notifications dans le widget
 
-## Mise à jour sans perdre les avis
+## Mise à jour sans perte de commentaires
 
-1. **Ne pas réimporter** la table `Commentaires` si elle contient déjà des avis. Ajouter seulement deux colonnes **Texte** `AuteurEmail` et `ParentId` (vides pour les anciens enregistrements). Conserver toutes les autres colonnes existantes.
-2. Dans `Commentaires`, configurer la colonne `AuteurEmail` avec une **formule déclenchée** `user.Email` appliquée **à la création des enregistrements uniquement**. Cette colonne doit être alimentée par Grist, jamais par le widget. Les anciens avis sans email vérifié restent lisibles mais ne sont pas modifiables depuis le widget.
-3. Créer une table technique `IdentiteWidget` avec `Jeton` (Texte), `Email` (Texte), `Nom` (Texte). Configurer des **formules déclenchées** sur `Email` : `user.Email` et `Nom` : `user.Name`, appliquées **à la création**. Vérifier que les champs sont bien alimentés à la création, puis tester le widget.
-4. **Configurer des règles de contrôle d'accès (ACL) Grist** sur `Commentaires` : lecture et création autorisées aux contributeurs ; mise à jour et suppression autorisées uniquement si `rec.AuteurEmail == user.Email` ; refuser la modification directe de `AuteurEmail` et des champs d'identité/ownership, et empêcher de créer des enregistrements avec une identité falsifiée. Les détails des règles dépendent des règles ACL existantes du document. **Sans ACL, la restriction “mes avis seulement” est uniquement dans l'interface et n'est pas une garantie de sécurité.**
-5. La table technique `IdentiteWidget` est utilisée pour découvrir l'identité de la session. La création/lecture/suppression de ses lignes doit être autorisée ; la visibilité des données d'identité et le nettoyage des lignes doivent être examinés dans le cadre de la sécurité du document.
-6. Héberger `index.html` sur GitHub Pages (ou `apia_widget_grist.html` à une URL exacte) et renseigner son URL dans le widget personnalisé de Grist ; accorder **Full document access** seulement dans un document d'atelier dédié.
+Remplacer le fichier `index.html` publié sur GitHub Pages et recharger le widget Grist. **Ne pas réimporter la table `Commentaires` existante**. Vérifier ses colonnes techniques : `CommentId`, `ElementId`, `Auteur`, `AuteurEmail`, `Texte`, `Position`, `CreeLe`, `ModifieLe`, `ParentId` (ParentId : Texte). Les nouveaux commentaires enregistrent `AuteurEmail` pour permettre de reconnaître leurs auteurs.
 
-## Fonctionnalités
-- Une seule vue, **sans interface Admin**.
-- Fenêtre modale de discussion par élément du scénario, métier ou regroupement.
-- Nouvel avis, réponse à un avis, édition et suppression **de ses propres avis**.
-- Saisie `@` avec suggestions à partir des auteurs des avis existants. **Pas de notification native** envoyée aux utilisateurs mentionnés.
-- Avis historiques conservés avec leurs identifiants, mais sans propriété vérifiable tant qu'ils n'ont pas `AuteurEmail`.
-- Le widget n'utilise pas de nom saisi manuellement comme preuve d'identité.
+## Mentions @
 
-## Attention à la confidentialité
-Les avis et les mentions sont stockés dans le document Grist. Ne pas y inclure de données personnelles issues de dossiers AIPD réels.
+La saisie de `@` puis de lettres filtre immédiatement les utilisateurs par nom ou email, sans distinction d'accents ni de casse. Sélectionner un résultat pour insérer un jeton `@Prenom_Nom` ; ce jeton est associé à l'email de l'annuaire lors de la publication. Les utilisateurs proviennent de la table `AnnuaireUtilisateurs` (`Nom`, `Email`, `Actif`) : elle doit être **synchronisée avec les personnes ayant réellement accès au document**, via l'API de permissions Grist ou une procédure d'administration. Le widget seul ne peut pas récupérer automatiquement toute cette liste. Le CSV livré ne contient aucun utilisateur réel.
+
+## Notifications internes
+
+Importer la nouvelle table `NotificationsAvis` si elle n'existe pas, avec les colonnes `DestinataireEmail`, `AuteurEmail`, `CommentId`, `ElementId`, `Lien`, `Statut`. À la publication d'un commentaire contenant une mention valide, ou d'une réponse à un avis, une ligne est créée pour chaque destinataire. Le bouton cloche 🔔 du widget affiche le nombre de notifications non lues, leur liste et permet d'ouvrir le fil concerné, avec surlignage du commentaire. La notification passe à `Lue` au clic. **Aucun email, aucun service d'envoi**. Les notifications apparaissent lorsque le widget est ouvert ou actualisé ; elles ne sont pas des notifications globales de l'interface Grist.
+
+## Droits et sécurité
+
+Le widget utilise `IdentiteWidget` pour identifier la session (colonnes déclenchées `Email=user.Email`, `Nom=user.Name`, selon la configuration de Grist). Les boutons Modifier et Supprimer n'apparaissent que pour les avis dont `AuteurEmail` correspond à l'utilisateur courant. Les commentaires historiques sans email doivent être attribués après vérification par un administrateur. **Ces contrôles d'interface ne sont pas une garantie de sécurité** : définir des règles ACL Grist sur `Commentaires` et `NotificationsAvis` afin que les utilisateurs ne puissent modifier/supprimer que leurs propres lignes et ne lire que leurs propres notifications. Vérifier que les règles autorisent les créations attendues et tester avec deux comptes. L'usage d'un widget en accès complet dans un document partagé demande une revue de sécurité des ACL.
 
 ## Limites
-L'API des widgets Grist ne fournit pas directement l'identité de l'utilisateur ; la table technique et les formules déclenchées sont donc nécessaires. Les @mentions sont une aide à la rédaction, pas un système de notifications. Les règles ACL Grist sont indispensables pour garantir l'édition/suppression de ses seuls avis.
+
+Le lien dans `NotificationsAvis.Lien` pointe vers l'URL du widget et son ancre ; selon la manière dont GitHub Pages est intégré dans Grist, ouvrir cette URL hors Grist ne donnera pas accès aux données. **La navigation fiable est celle de la cloche à l'intérieur du widget**. Les utilisateurs doivent ouvrir le document pour voir leurs notifications. Cette version n'a pas été testée sur votre instance Grist.
