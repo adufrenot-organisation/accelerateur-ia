@@ -1,1 +1,1 @@
-﻿CommentId,ElementId,Auteur,Texte,Position,CreeLe,ModifieLe
+CommentId,ElementId,Auteur,AuteurEmail,Texte,Position,CreeLe,ModifieLe,ParentId
