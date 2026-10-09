@@ -1,0 +1,27 @@
+﻿ElementId,Titre,Categorie
+question,Question utilisateur,Question
+r1,Réponse 1,Réponse
+r2,Réponse 2,Réponse
+r3,Réponse 3,Réponse
+ticket,Ticket support,Support
+step0,Utilisateur,Étape
+step1,Support,Étape
+step2,Product Owner,Étape
+step3,Tech Lead / Architecte IA,Étape
+step4,LLM & Context — diagnostic,Étape
+step5,LLM & Context — optimisation,Étape
+step6,AI Software Engineer,Étape
+step7,ML Engineer / MLOps si nécessaire,Étape
+step8,"QA, PO et support",Étape
+role0,AI Software Engineer,Métier
+role1,LLM & Context Engineer,Métier
+role2,LLMOps Engineer (ancien découpage),Historique
+role3,ML Engineer,Métier
+role4,MLOps / AI Platform Engineer,Métier
+role5,DevOps Engineer,Métier
+fusion0,AI Software + Prompt / Context (hypothèse initiale),Regroupement
+fusion1,DevOps + LLMOps (hypothèse initiale),Regroupement
+fusion2,ML Engineer + MLOps,Regroupement
+fusion3,LLMOps + Prompt / Context → LLM & Context Engineer,Regroupement
+fusion4,AI Software + LLMOps (alternative),Regroupement
+fusion5,DevOps applicatif + LLM & Context : coordination,Regroupement
